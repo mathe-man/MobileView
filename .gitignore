@@ -1,0 +1,10 @@
+
+# IDEs and text editors
+.vscode
+.vs
+.idea
+
+
+# Platform IO
+.pio
+
