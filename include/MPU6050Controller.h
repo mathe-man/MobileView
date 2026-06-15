@@ -4,6 +4,9 @@
 
 #include <Wire.h>
 #include <I2Cdev.h>
+
+// Platformio lib_deps =
+// electroniccats/MPU6050
 #include <MPU6050_6Axis_MotionApps20.h>
 
 
