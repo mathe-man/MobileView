@@ -9,13 +9,10 @@ public:
     ILI9341Controller(
         int cs_pin, int rst_pin, int dc_pin,
         int mosi_pin, int miso_pin, int sclk_pin,
-        Color background = {0.f, 0.f, 0.f},
-        Color drawing = {1.f, 1.f, 1.f}
+        Color background = {1.f, 1.f, 1.f},
+        Color drawing = {0.f, 0.f, 0.f}
         );
-    ~ILI9341Controller() override {
-        //delete m_tft;
-        //delete m_spi;
-    }
+
 
     void SetDrawColor(const Color &color) override;
     void SetBackground(const Color &color) override;
