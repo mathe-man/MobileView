@@ -1,35 +1,71 @@
 ﻿#include <ILI9341Controller.h>
 
-ILI9341Controller::ILI9341Controller(Pinout pins, uint16_t width, uint16_t height, uint32_t freq_write, uint32_t freq_read) {
+ILI9341Controller::ILI9341Controller(
+    int cs_pin,
+    int rst_pin,
+    int dc_pin,
+    int mosi_pin,
+    int miso_pin,
+    int sclk_pin,
+    Color background,
+    Color drawing
+    )
+        : m_spi(FSPI),
+      m_tft(&m_spi, dc_pin, cs_pin, rst_pin)
+{
 
-    // SPI bus configuration
-    {
-        auto cfg = _bus_instance.config();
-        cfg.spi_host = SPI2_HOST;   // FSPI bus of the ESP32-S3
-        cfg.spi_mode = 0;
-        cfg.freq_write = freq_write;
-        cfg.freq_read  = freq_read;
-        cfg.pin_sclk = pins.pin_SCK;            // PINS
-        cfg.pin_mosi = pins.pin_mosi;
-        cfg.pin_miso = pins.pin_miso;
-        cfg.pin_dc   = pins.pin_dc;
-        _bus_instance.config(cfg);
-        _panel_instance.setBus(&_bus_instance);
-    }
+    // SPI communication etablishment
+    m_spi.begin(
+        sclk_pin,
+        miso_pin,
+        mosi_pin
+        );
 
-    // Screen panel configuration
-    {
-        auto cfg = _panel_instance.config();
-        cfg.pin_cs           = pins.pin_cs;
-        cfg.pin_rst          = pins.pin_reset;
-        cfg.pin_busy         = -1;
-        cfg.panel_width      = width;
-        cfg.panel_height     = height;
-        cfg.offset_x         = 0;
-        cfg.offset_y         = 0;
-        cfg.rgb_order        = false;
-        _panel_instance.config(cfg);
-    }
 
-    setPanel(&_panel_instance);
+    // TFT Screen init
+    m_tft.begin();
+
+
+    // Default colors
+    // White background
+    m_backgroundColor   = ToRGB565(background);
+    // Black drawing
+    m_drawColor         = ToRGB565(drawing);
+
+
+    // Setup screen
+    m_tft.setRotation(0);
+    m_tft.fillScreen(m_backgroundColor);
+}
+
+uint16_t ILI9341Controller::ToRGB565(const Color &color) {
+    return m_tft.color565(
+        static_cast<uint8_t>(color.r * 255.f),
+        static_cast<uint8_t>(color.g * 255.f),
+        static_cast<uint8_t>(color.b * 255.f)
+    );
+}
+
+void ILI9341Controller::SetDrawColor(const Color &color) {
+    m_drawColor = ToRGB565(color);
+}
+
+void ILI9341Controller::SetBackground(const Color &color) {
+    m_backgroundColor = ToRGB565(color);
+}
+
+void ILI9341Controller::DrawPixel(int x, int y) {
+    m_tft.drawPixel(x, y, m_drawColor);
+}
+
+void ILI9341Controller::DrawLine(int x1, int y1, int x2, int y2) {
+    m_tft.drawLine(x1, y1, x2, y2, m_drawColor);
+}
+
+void ILI9341Controller::DrawCircle(int x, int y, int radius) {
+    m_tft.drawCircle(x, y, radius, m_drawColor);
+}
+
+void ILI9341Controller::Clear() {
+    m_tft.fillScreen(m_backgroundColor);
 }

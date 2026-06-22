@@ -1,31 +1,36 @@
 ﻿#pragma once
+#include <GraphicsController.h>
 
-#include <ScreenController.h>
+#include <SPI.h>
+#include <Adafruit_ILI9341.h>
 
-// Platformio lib_deps =
-// lovyan03/LovyanGFX
-#include <LovyanGFX.hpp>
-
-struct Pinout {
-    uint16_t pin_cs;
-    uint16_t pin_reset;
-    uint16_t pin_dc;
-    uint16_t pin_mosi;
-    uint16_t pin_SCK;
-    uint16_t pin_miso;
-};
-
-class ILI9341Controller : public ScreenController, public lgfx::LGFX_Device {
-    lgfx::Panel_ILI9341 _panel_instance;
-    lgfx::Bus_SPI       _bus_instance;
-
-
+class ILI9341Controller : public GraphicsController {
 public:
-    ILI9341Controller(Pinout pins, uint16_t width = 240, uint16_t height = 320, uint32_t freq_write = 40000000, uint32_t freq_read = 16000000);
+    ILI9341Controller(
+        int cs_pin, int rst_pin, int dc_pin,
+        int mosi_pin, int miso_pin, int sclk_pin,
+        Color background = {0.f, 0.f, 0.f},
+        Color drawing = {1.f, 1.f, 1.f}
+        );
+    ~ILI9341Controller() override {
+        //delete m_tft;
+        //delete m_spi;
+    }
 
-    virtual ~ILI9341Controller() =  default;
+    void SetDrawColor(const Color &color) override;
+    void SetBackground(const Color &color) override;
 
-    void begin() { init(); }
+    void DrawPixel(int x, int y) override;
+    void DrawLine(int x1, int y1, int x2, int y2) override;
+    void DrawCircle(int x, int y, int radius) override;
 
-    // TODO implement the ScreenController methods
+    void Clear() override;
+private:
+    SPIClass m_spi;
+    Adafruit_ILI9341 m_tft;
+
+    // This screen use RGB565 color parameters
+    uint16_t inline ToRGB565(const Color& color);
+    uint16_t m_drawColor;
+    uint16_t m_backgroundColor;
 };
