@@ -14,7 +14,7 @@ ILI9341Controller::ILI9341Controller(
       m_tft(&m_spi, dc_pin, cs_pin, rst_pin)
 {
 
-    // SPI communication etablishment
+    // SPI communication establishment
     m_spi.begin(
         sclk_pin,
         miso_pin,
